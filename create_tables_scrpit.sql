@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS User (
+	user_id serial PRIMARY KEY,
+	gender VARCHAR(2) NOT NULL,
+	age VARCHAR(2) NOT NULL,
+	city VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS Pair (
+	pair_id serial PRIMARY KEY,
+	name VARCHAR(60) NOT NULL,
+	surname VARCHAR(60) NOT NULL,
+	link_page VARCHAR(200) NOT NULL,
+	pictures VARCHAR(500) NOT NULL,
+	
+);
+
+CREATE TABLE IF NOT EXISTS Favorite (
+	user_id INTEGER REFERENCES User(user_id),
+	pair_id INTEGER REFERENCES Pair(pair_id) 
+);
