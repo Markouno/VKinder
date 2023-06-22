@@ -24,5 +24,5 @@ def get_mod():
 
 
 if __name__ == '__main__':
-    # pprint(parse())
-    pprint(get_mod())
+    pprint(parse())
+    # pprint(get_mod())
