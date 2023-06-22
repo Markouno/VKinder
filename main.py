@@ -1,14 +1,22 @@
 import requests
 from pprint import pprint
-from token_ import TOKEN
-from token_ import vk_token
+from tokens import community_token
+from tokens import user_token
+import json
 
 
 
 def parse():
-    params = {'count': '10', 'sex': '2', 'age_to': '26', 'access_token': vk_token, 'v': '5.131'}
+    params = {'count': '1000', 'sex': '2', 'age_to': '26', 'access_token': user_token, 'v': '5.131'}
     response = requests.get('https://api.vk.com/method/users.search', params=params)
     result = response.json()
+    some_shit = result['response']['items']
+    json_list = []
+    for item in some_shit:
+        json_list.append(item['id'])
+
+    with open('data.json', 'a', encoding='UTF-8') as jsonfile:
+        json.dump(json_list, jsonfile, indent= 2)
     return result
 
 def get_mod():
@@ -16,11 +24,11 @@ def get_mod():
     person = my_list['response']['items']
     for item in person:
         id = item['id']
-        params = {'owner_id': id, 'album_id': 'profile', 'extended': '1','access_token': vk_token, 'v': '5.131'}
+        params = {'owner_id': id, 'album_id': 'profile', 'extended': '1','access_token': user_token, 'v': '5.131'}
         response = requests.get(f'https://api.vk.com/method/photos.get', params=params)
         result = response.json()
+        # max_pic_size = sorted(item['sizes'], key=lambda x: (x['width'], x['height']))[-1]
         return result
-
 
 
 if __name__ == '__main__':
