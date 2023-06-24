@@ -17,7 +17,7 @@ def parse():
         json_list.append(item['id'])
         count += 1
 
-    with open('json_data/parcing_data.json', 'w', encoding='UTF-8') as jsonfile:
+    with open('sql/json_data/parcing_data.json', 'w', encoding='UTF-8') as jsonfile:
         json.dump(json_list, jsonfile, indent= 2)
     return result, count
 

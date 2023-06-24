@@ -14,5 +14,5 @@ def create_filter(f_list):
                  'city': city 
     }
 
-    with open('json_data/user_data.json', 'w', encoding='UTF-8') as jsonfile:
+    with open('sql/json_data/user_data.json', 'w', encoding='UTF-8') as jsonfile:
         json.dump(user_dict, jsonfile, indent=2, ensure_ascii=False)
