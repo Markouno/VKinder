@@ -1,9 +1,8 @@
-import vk_api
+import vk_api, random, time
 from vk_api.longpoll import VkLongPoll, VkEventType
 from tokens import community_token
 from create_filter import create_filter
-import random
-
+from sql.SQL_scripts import *
 
 
 vk = vk_api.VkApi(token=community_token)
@@ -32,6 +31,9 @@ for event in longpoll.listen():
                 write_msg(event.user_id, f'Начинаю поиск по параметрам: {filter_list[0]}, {filter_list[1]}, {filter_list[2]}.')
                 write_msg(event.user_id, f'Это займет какое-то время...')
                 create_filter(filter_list)
+                time.sleep(2)
+                user_data_push_in_base()
+
 
             else:
                 write_msg(event.user_id, "Не поняла вашего ответа...")
