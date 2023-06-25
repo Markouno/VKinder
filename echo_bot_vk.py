@@ -16,7 +16,7 @@ def write_msg(user_id, message, keyboard=None):
     parametrs = {'user_id': user_id,
                  'message': message,
                  'random_id': random.randrange(10 ** 7),
-                 'keyboard': keyboard.get_keyboard()}
+    }
 
     if keyboard != None:
         parametrs['keyboard'] = keyboard.get_keyboard()

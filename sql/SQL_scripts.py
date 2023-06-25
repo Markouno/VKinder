@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData
 
 
-DSN = 'postgresql://postgres:postgres@localhost:5432/VKinder'  # определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # создаем движок подключения
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -12,6 +12,7 @@ metadata = MetaData()
 
 users = Table('users', metadata,  # Создаем таблицу пользователя
               Column('id', Integer, primary_key=True),
+              Column('vk_user', String(30), nullable=False),
               Column('gender', String(15), nullable=False),
               Column('age', String(20), nullable=False),
               Column('city', String(83), nullable=False)
@@ -42,6 +43,7 @@ def user_data_push_in_base():
         json_data = json.load(file)
 
     insert_values = users.insert().values(   # Запись данных в базу дынных VKinder
+        vk_user=json_data['vk_user'],
         gender=json_data['gender'],
         age=json_data['age'],
         city=json_data['city']
@@ -53,7 +55,6 @@ def user_data_push_in_base():
 
     session.close()   # закрываем соединение с базой
 
-user_data_push_in_base()
 def search_hits_push_in_base():
     '''
     Чтение данных из JSON-файла
