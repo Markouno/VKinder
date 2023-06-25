@@ -1,5 +1,6 @@
 import vk_api, random, time
 from vk_api.longpoll import VkLongPoll, VkEventType
+from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from tokens import community_token
 from create_filter import create_filter
 from sql.SQL_scripts import *
@@ -11,8 +12,18 @@ longpoll = VkLongPoll(vk)
 answer_list = ['Привет!', 'Приветствую!', 'Здравствуйте!', 'Здарова!']
 hello_list = ['Привет', 'привет', 'Салам', 'салам', 'Хай', 'хай', 'Здарова', 'здарова']
 
-def write_msg(user_id, message):
-    vk.method('messages.send', {'user_id': user_id, 'message': message,  'random_id': random.randrange(10 ** 7),})
+def write_msg(user_id, message, keyboard=None):
+    parametrs = {'user_id': user_id,
+                 'message': message,
+                 'random_id': random.randrange(10 ** 7),
+                 'keyboard': keyboard.get_keyboard()}
+
+    if keyboard != None:
+        parametrs['keyboard'] = keyboard.get_keyboard()
+    else:
+        pass
+
+    vk.method('messages.send', parametrs)
 
 
 for event in longpoll.listen():
@@ -31,8 +42,11 @@ for event in longpoll.listen():
                 write_msg(event.user_id, f'Начинаю поиск по параметрам: {filter_list[0]}, {filter_list[1]}, {filter_list[2]}.')
                 write_msg(event.user_id, f'Это займет какое-то время...')
                 create_filter(filter_list, event.user_id)
-                time.sleep(2)
                 user_data_push_in_base()
+
+                keyboard = VkKeyboard()
+                keyboard.add_button('Нравится!', VkKeyboardColor.PRIMARY)
+                write_msg(event.user_id, f'Саламчик!', keyboard)
 
 
             else:
