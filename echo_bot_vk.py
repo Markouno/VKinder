@@ -30,7 +30,7 @@ for event in longpoll.listen():
             elif len(filter_list) == 3:
                 write_msg(event.user_id, f'Начинаю поиск по параметрам: {filter_list[0]}, {filter_list[1]}, {filter_list[2]}.')
                 write_msg(event.user_id, f'Это займет какое-то время...')
-                create_filter(filter_list)
+                create_filter(filter_list, event.user_id)
                 time.sleep(2)
                 user_data_push_in_base()
 

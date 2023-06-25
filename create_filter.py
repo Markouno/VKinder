@@ -1,7 +1,7 @@
 import json
 
 
-def create_filter(f_list):
+def create_filter(f_list, user_id):
     '''
     Данный метод принимает список параметров для поиска,
     после чего конвертирует их в JSON-файл.
@@ -15,7 +15,8 @@ def create_filter(f_list):
     else:
         gender = '1'
 
-    user_dict = {'gender': gender,
+    user_dict = {'vk_user': user_id,
+                 'gender': gender,
                  'age': age,
                  'city': city 
     }
