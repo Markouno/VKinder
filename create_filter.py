@@ -8,10 +8,12 @@ def create_filter(f_list):
 
     '''
     gender, age, city = f_list[0], f_list[1], f_list[2]
-    gender = '1'
+
 
     if gender == 'Мужской':
         gender = '2'
+    else:
+        gender = '1'
 
     user_dict = {'gender': gender,
                  'age': age,
