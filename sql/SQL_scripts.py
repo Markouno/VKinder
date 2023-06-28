@@ -1,6 +1,6 @@
 import sqlalchemy, json
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData
+from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData, Select
 
 
 DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # определяем параметры подключения к базе данных
@@ -9,9 +9,12 @@ Session = sessionmaker(bind=engine)
 session = Session()
 metadata = MetaData()
 
-
+'''
+CREATE запросы
+'''
 users = Table('users', metadata,  # Создаем таблицу пользователя
               Column('id', Integer, primary_key=True),
+              Column('vk_user', String(30), nullable=False),
               Column('gender', String(15), nullable=False),
               Column('age', String(20), nullable=False),
               Column('city', String(83), nullable=False)
@@ -35,13 +38,16 @@ def create_table_in_base():   # создание таблиц в базе дан
 
 # create_table_in_base()   # Вызов функции создания таблиц в базе данных
 
-
+'''
+INSERT запросы
+'''
 def user_data_push_in_base():
 
     with open('sql/json_data/user_data.json', 'r', encoding='UTF=8') as file:   # Чтение данных из JSON-файла
         json_data = json.load(file)
 
     insert_values = users.insert().values(   # Запись данных в базу дынных VKinder
+        vk_user=json_data['vk_user'],
         gender=json_data['gender'],
         age=json_data['age'],
         city=json_data['city']
@@ -53,7 +59,7 @@ def user_data_push_in_base():
 
     session.close()   # закрываем соединение с базой
 
-user_data_push_in_base()
+# user_data_push_in_base()
 def search_hits_push_in_base():
     '''
     Чтение данных из JSON-файла
@@ -77,18 +83,17 @@ def search_hits_push_in_base():
     session.close()  # закрываем соединение с базой
 
 
-# def adding_to_favorites():   # пока не понимаю до конца какие данные будем заливать, оставлю на завтра
-#     for item in favorite_check:
-#         people_who_liked = favorite.insert().values(
-#             users_id=item['users_id'],
-#             pair_id=item['pair_id']
-#         )
-#         session.execute(people_who_liked)
-#
-#     session.commit()
+'''
+SELECT запросы
+'''
+vk_id = '790733692'   # Объявляем цель SELECT запроса в базу VKinder и таблицу users
 
+def get_user_data():   # SELECT запрос в таблицу users
+    session = Session()  # Создаем новую сессию
+    select_query = Select(users.c.gender, users.c.age, users.c.city).where(users.c.vk_user == vk_id)
+    result = session.execute(select_query)
+    rows = result.fetchall()
+    session.close()  # Закрываем сессию
+    return rows
 
-# if __name__ == '__main__':
-    # user_data_push_in_base()
-    # search_hits_push_in_base()
-    # adding_to_favorites()
+get_user_data()   # Вызываем функцию для проверки, но только в дебагере, чтобы увидеть результат
