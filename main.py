@@ -1,38 +1,48 @@
 import requests
-from pprint import pprint
-from tokens import community_token
-from tokens import user_token
 import json
 
+from tokens import user_token
 
+class VK_Parse:
+    def __init__(self, access_token, age_from, age_to, sex):
+        self.access_token = access_token
+        self.age_from = age_from
+        self.age_to = age_to
+        self.sex = sex
 
-def parse():
-    params = {'count': '1000', 'sex': '2', 'age_to': '26', 'access_token': user_token, 'v': '5.131'}
-    response = requests.get('https://api.vk.com/method/users.search', params=params)
-    result = response.json()
-    some_shit = result['response']['items']
-    json_list = []
-    count = 0
-    for item in some_shit:
-        json_list.append(item['id'])
-        count += 1
+    def parse(self):
+        params = {'count': '1000', 'sex': self.sex, 'age_from': self.age_from, 'age_to': self.age_to, 'access_token': self.access_token, 'v': '5.131'}
+        try:
+            response = requests.get('https://api.vk.com/method/users.search', params=params)
+            result = response.json()
+        except Exception as e:
+            print(f"Ошибка: {e}")
+        else:
+            res = result['response']['items']
+            json_list = []
+            for item in res:
+                profile_url = f"https://vk.com/id{item['id']}"
+                json_list.append({'id': item['id'], 'first_name': item['first_name'], 'last_name': item['last_name'], 'profile_url': profile_url})
 
-    with open('sql/json_data/parcing_data.json', 'w', encoding='UTF-8') as jsonfile:
-        json.dump(json_list, jsonfile, indent= 2)
-    return result, count
+                photos = self.get_photos(item['id'])
+                json_list[-1]['photos'] = photos
 
-def get_mod():
-    my_list = parse()
-    person = my_list['response']['items']
-    for item in person:
-        id = item['id']
-        params = {'owner_id': id, 'album_id': 'profile', 'extended': '1','access_token': user_token, 'v': '5.131'}
-        response = requests.get(f'https://api.vk.com/method/photos.get', params=params)
-        result = response.json()
-        # max_pic_size = sorted(item['sizes'], key=lambda x: (x['width'], x['height']))[-1]
-        return result
+            with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
+                json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
 
+    def get_photos(self, user_id):
+        photos_params = {'owner_id': user_id, 'album_id': 'profile', 'rev': '1', 'count': '3', 'access_token': self.access_token, 'v': '5.131'}
+        try:
+            photos_response = requests.get('https://api.vk.com/method/photos.get', params=photos_params)
+            photos_result = photos_response.json()
+            photo_urls = []
+            if 'response' in photos_result:
+                for photo in photos_result['response']['items']:
+                    photo_urls.append(photo['sizes'][-1]['url'])
+            return photo_urls
+        except Exception as e:
+            print(f"Ошибка при получении фотографий: {e}")
+            return []
 
-if __name__ == '__main__':
-    pprint(parse())
-    # pprint(get_mod())
+vk_parse = VK_Parse(user_token, 18, 30, 1)
+vk_parse.parse()
