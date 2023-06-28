@@ -22,10 +22,11 @@ users = Table('users', metadata,  # Создаем таблицу пользов
 
 pair = Table('pair', metadata,  # Создаем таблицу результата поиска людей по параметрам пользователя
              Column('id', Integer, primary_key=True),
-             Column('name', String(60), nullable=False),
-             Column('lastname', String(60), nullable=False),
-             Column('link_page', String(200), nullable=False),
-             Column('link_photos', String(500), nullable=False)
+             Column('first_name', String(60), nullable=False),
+             Column('last_name', String(60), nullable=False),
+             Column('city', String(200), nullable=False),
+             Column('profile_url', String(200), nullable=False),
+             Column('photos', String(500), nullable=False)
              )
 
 favorite = Table('favorite', metadata,  # Создаем таблицу связей первых двух таблиц
@@ -71,10 +72,11 @@ def search_hits_push_in_base():
         '''
     for data in json_data:
         pair_object = pair.insert().values(   # Определяем колонки и их значения для записи в базу
-            name=data['name'],
-            lastname=data['lastname'],
-            link_page=data['link_page'],
-            link_photos=data['link_photos']
+            first_name=data['first_name'],
+            last_name=data['lastname'],
+            city=data['city'],
+            profile_url=data['profile_url'],
+            photos=data['photos']
         )
         session.execute(pair_object)  # добавляем записи в базу
 
