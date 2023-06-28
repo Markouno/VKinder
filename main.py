@@ -1,7 +1,7 @@
 import requests
 import json
-
 from tokens import user_token
+
 
 class VK_Parse:
     def __init__(self, access_token, age_from, age_to, sex):
@@ -11,7 +11,7 @@ class VK_Parse:
         self.sex = sex
 
     def parse(self):
-        params = {'count': '1000', 'sex': self.sex, 'age_from': self.age_from, 'age_to': self.age_to, 'access_token': self.access_token, 'v': '5.131'}
+        params = {'count': '1000', 'sex': self.sex, 'has_photo': '1', 'age_from': self.age_from, 'age_to': self.age_to, 'access_token': self.access_token, 'v': '5.131', 'fields': 'city'}
         try:
             response = requests.get('https://api.vk.com/method/users.search', params=params)
             result = response.json()
@@ -22,10 +22,10 @@ class VK_Parse:
             json_list = []
             for item in res:
                 profile_url = f"https://vk.com/id{item['id']}"
-                json_list.append({'id': item['id'], 'first_name': item['first_name'], 'last_name': item['last_name'], 'profile_url': profile_url})
-
                 photos = self.get_photos(item['id'])
-                json_list[-1]['photos'] = photos
+                city = item.get('city', {}).get('title')
+                if city and photos:
+                    json_list.append({'id': item['id'], 'first_name': item['first_name'], 'last_name': item['last_name'], 'city': city, 'profile_url': profile_url, 'photos': photos})
 
             with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
@@ -37,7 +37,9 @@ class VK_Parse:
             photos_result = photos_response.json()
             photo_urls = []
             if 'response' in photos_result:
-                for photo in photos_result['response']['items']:
+                photos = photos_result['response']['items']
+                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get('count', 0), reverse=True)
+                for photo in sorted_photos[:3]:
                     photo_urls.append(photo['sizes'][-1]['url'])
             return photo_urls
         except Exception as e:
