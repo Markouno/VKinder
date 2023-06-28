@@ -32,7 +32,8 @@ for event in longpoll.listen():
         if event.to_me:
             request = event.text
             filter_list = event.text.split(', ')
-
+            start_button = VkKeyboard(one_time=True)
+            start_button.add_button('Начать', VkKeyboardColor.PRIMARY, )
             if request == 'Начать':
                 write_msg(event.user_id, f"{random.choice(answer_list)}")
                 write_msg(event.user_id, f'Подскажи, кого мы ищем? Укажи через запятую пол, возраст и город.')
@@ -44,9 +45,9 @@ for event in longpoll.listen():
                 create_filter(filter_list, event.user_id)
                 user_data_push_in_base()
 
-                keyboard = VkKeyboard()
-                keyboard.add_button('Нравится!', VkKeyboardColor.PRIMARY)
-                write_msg(event.user_id, f'Саламчик!', keyboard)
+                
+                
+                
 
 
             else:
