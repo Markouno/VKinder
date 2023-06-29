@@ -125,7 +125,7 @@ vk_id = '790733692'  # Объявляем цель SELECT запроса в ба
 def get_user_data():  # SELECT запрос в таблицу users
     session = Session()  # Создаем новую сессию
     select_query = Select(users.c.gender, users.c.age, users.c.city).where(
-        users.c.vk_user == vk_id)  # Указываем параметры SELECT запроса, что достать и условие поиска
+    users.c.vk_user == vk_id)  # Указываем параметры SELECT запроса, что достать и условие поиска
     result = session.execute(select_query)
     rows = result.fetchall()  # Вся информация интересующая нас лежит здесь
     session.close()  # Закрываем сессию
