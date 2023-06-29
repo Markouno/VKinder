@@ -108,8 +108,8 @@ def city_id_push_in_base():  # Запись данных city_id в базу д�
         city_object = city.insert().values(
             city_id=data.get('id'),
             title=data.get('title'),
-            area=data.get('area'),
-            region=data.get('region')
+            area=data.get('area'),   # Если ключа и значения нет, то get() вернет None
+            region=data.get('region')   # Если ключа и значения нет, то get() вернет None
         )
         session.execute(city_object)  # добавляем записи в базу
 
