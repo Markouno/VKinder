@@ -3,11 +3,13 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData, Select
 from tqdm import tqdm
 
+
 DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()
 metadata = MetaData()
+
 
 '''
 CREATE запросы
@@ -77,8 +79,7 @@ def user_data_push_in_base():
 
 
 def search_hits_push_in_base():  # Запись подходящих по параметрам людей в таблицу pair
-
-    with open('json_data/pair_data.json', 'r', encoding='UTF-8') as file:  # Чтение данных из JSON-файла
+    with open('../sql/json_data/pair_data.json', 'r', encoding='UTF-8') as file:  # Чтение данных из JSON-файла
         json_data = json.load(file)
 
     for data in json_data:
@@ -97,7 +98,7 @@ def search_hits_push_in_base():  # Запись подходящих по пар
     session.close()  # закрываем соединение с базой
 
 
-# search_hits_push_in_base()   #   Вызов функции записи данных в базу, результата парсинга по параметрам пользователя
+search_hits_push_in_base()   #   Вызов функции записи данных в базу, результата парсинга по параметрам пользователя
 
 
 def city_id_push_in_base():  # Запись данных city_id в базу данных
