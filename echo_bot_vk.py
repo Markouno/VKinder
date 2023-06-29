@@ -53,7 +53,7 @@ for event in longpoll.listen():
                 write_msg(event.user_id, f'Это займет какое-то время...')
                 create_filter(filter_list, event.user_id)
                 user_data_push_in_base()
-                vk_parser = VK_Parse(user_token, age, age, 2)
+                vk_parser = VK_Parse(user_token, gender, age, city)
                 vk_parser.parse()
                 write_msg(event.user_id, f'Сортируем плохих и хороших...')
                 search_hits_push_in_base()

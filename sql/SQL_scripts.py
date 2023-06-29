@@ -72,9 +72,7 @@ def user_data_push_in_base():
 
 
 def search_hits_push_in_base():
-    '''
-    Чтение данных из JSON-файла
-    '''
+
     with open('sql/json_data/pair_data.json', 'r', encoding='UTF-8') as file:
         json_data = json.load(file)
 
@@ -83,7 +81,7 @@ def search_hits_push_in_base():
             # Определяем колонки и их значения для записи в базу. Запись данных в базу дынных VKinder
             first_name=data['first_name'],
             last_name=data['last_name'],
-            city= 'Москва',
+            city= data['city'],
             profile_url=data['profile_url'],
             photos=data['photos']
         )
@@ -118,14 +116,12 @@ def city_id_push_in_base():  # Запись данных city_id в базу д�
 
 
 # city_id_push_in_base()  # Вызов функции записи данных city_id в базу данных
+# Объявляем цель select запроса в базу VKinder и таблицу users
 
-vk_id = '790733692'  # Объявляем цель SELECT запроса в базу VKinder и таблицу users
-
-
-def get_user_data():  # SELECT запрос в таблицу users
+def get_user_data():  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
     select_query = Select(users.c.gender, users.c.age, users.c.city).where(
-    users.c.vk_user == vk_id)  # Указываем параметры SELECT запроса, что достать и условие поиска
+        users.c.vk_user == vk_id)  # Указываем параметры select запроса, что достать и условие поиска
     result = session.execute(select_query)
     rows = result.fetchall()  # Вся информация интересующая нас лежит здесь
     session.close()  # Закрываем сессию
