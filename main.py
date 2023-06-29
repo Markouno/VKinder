@@ -1,17 +1,29 @@
 import requests, json
 from tokens import user_token
 from tqdm import tqdm
-
+import sys
 
 class VK_Parse:
-    def __init__(self, access_token, age_from, age_to, sex):
+    def __init__(self, access_token, gender, age, city):
         self.access_token = access_token
-        self.age_from = age_from
-        self.age_to = age_to
-        self.sex = sex
+        self.age = age
+        if gender == 'Мужской':
+            gender = '2'
+        else:
+            gender = '1'
+        self.gender = gender
+        self.city = city
 
     def parse(self):
-        params = {'count': '1000', 'sex': self.sex, 'age_from': self.age_from, 'age_to': self.age_to, 'access_token': self.access_token, 'v': '5.131'}
+        params = {'count': '1000',
+                  'sex': self.gender,
+                  'hometown': self.city,
+                  'age_from': self.age,
+                  'age_to': self.age,
+                  'has_photo': '1',
+                  'access_token': self.access_token,
+                  'v': '5.131' 
+                  }
         try:
             response = requests.get('https://api.vk.com/method/users.search', params=params)
             result = response.json()
@@ -22,7 +34,11 @@ class VK_Parse:
             json_list = []
             for item in tqdm(res, desc='Идет поиск...'):
                 profile_url = f"https://vk.com/id{item['id']}"
-                json_list.append({'id': item['id'], 'first_name': item['first_name'], 'last_name': item['last_name'], 'profile_url': profile_url})
+                json_list.append({'id': item['id'],
+                                  'first_name': item['first_name'],
+                                  'last_name': item['last_name'],
+                                  'city': self.city,
+                                  'profile_url': profile_url})
 
                 photos = self.get_photos(item['id'])
                 json_list[-1]['photos'] = photos
@@ -43,6 +59,13 @@ class VK_Parse:
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
+    
+#     def get_city_id(self):
+        
+#         params = {'hometown': self.city,
+#                   'access_token': self.access_token,
+#                   'v': '5.131'}
+#         response = requests.get('https://api.vk.com/method/database.getCities', params=params)
+#         return response.json()
+#         # self.city =        
 
-# vk_parse = VK_Parse(user_token, 18, 30, 1)
-# vk_parse.parse()
