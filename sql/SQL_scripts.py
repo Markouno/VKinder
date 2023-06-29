@@ -4,15 +4,13 @@ from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData, Sel
 from tqdm import tqdm
 
 
-DSN = 'postgresql://postgres:postgres@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()
 metadata = MetaData()
 
-'''
-CREATE запросы
-'''
+
 users = Table('users', metadata,  # Создаем таблицу пользователя
               Column('id', Integer, primary_key=True),
               Column('vk_user', String(30), nullable=False),
@@ -51,10 +49,6 @@ def create_table_in_base():  # Функция создания таблиц в �
 
 # create_table_in_base()  # Вызов функции создания таблиц в базе данных
 
-'''
-INSERT запросы
-'''
-
 
 def user_data_push_in_base():
     with open('sql/json_data/user_data.json', 'r', encoding='UTF-8') as file:  # Чтение данных из JSON-файла
@@ -89,7 +83,7 @@ def search_hits_push_in_base():
             # Определяем колонки и их значения для записи в базу. Запись данных в базу дынных VKinder
             first_name=data['first_name'],
             last_name=data['last_name'],
-            city=data['city'],
+            city= 'Москва',
             profile_url=data['profile_url'],
             photos=data['photos']
         )
@@ -98,6 +92,8 @@ def search_hits_push_in_base():
     session.commit()  # фиксируем изменения в базе
 
     session.close()  # закрываем соединение с базой
+
+# search_hits_push_in_base()
 
 
 # search_hits_push_in_base()   #   Вызов функции записи данных в базу, результата парсинга по параметрам пользователя
@@ -123,9 +119,6 @@ def city_id_push_in_base():  # Запись данных city_id в базу д�
 
 # city_id_push_in_base()  # Вызов функции записи данных city_id в базу данных
 
-'''
-SELECT запросы
-'''
 vk_id = '790733692'  # Объявляем цель SELECT запроса в базу VKinder и таблицу users
 
 

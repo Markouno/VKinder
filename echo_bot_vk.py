@@ -37,13 +37,13 @@ for event in longpoll.listen():
             
             
             if request == 'Начать':
-                chat_button = VkKeyboard()
-                chat_button.add_button('Тест', VkKeyboardColor.PRIMARY)
-                chat_button.add_button('Второй тест', VkKeyboardColor.SECONDARY)
+                # chat_button = VkKeyboard()
+                # chat_button.add_button('Тест', VkKeyboardColor.PRIMARY)
+                # chat_button.add_button('Второй тест', VkKeyboardColor.SECONDARY)
 
                 write_msg(event.user_id, f"{random.choice(answer_list)}")
                 write_msg(event.user_id, f'Подскажи, кого мы ищем? Укажи через запятую пол, возраст и город.')
-                write_msg(event.user_id, f'Пример: Мужской, 26, Москва', chat_button)
+                write_msg(event.user_id, f'Пример: Мужской, 26, Москва')
             
             elif len(filter_list) == 3:
                 gender = filter_list[0]
@@ -55,6 +55,10 @@ for event in longpoll.listen():
                 user_data_push_in_base()
                 vk_parser = VK_Parse(user_token, age, age, 2)
                 vk_parser.parse()
+                write_msg(event.user_id, f'Сортируем плохих и хороших...')
+                search_hits_push_in_base()
+                write_msg(event.user_id, f'Готово! Начинаем?')
+
 
                 
                 
