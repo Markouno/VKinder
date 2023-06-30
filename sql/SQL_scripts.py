@@ -2,14 +2,14 @@ import sqlalchemy, json
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData, Select
 from tqdm import tqdm
+from pprint import pprint
 
-
-DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+# Не забываем подставлять свои пароль и имя пользователя
+DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
-session = Session()
+session = Session()  # Создаем объект сессии
 metadata = MetaData()
-
 
 users = Table('users', metadata,  # Создаем таблицу пользователя
               Column('id', Integer, primary_key=True),
@@ -70,9 +70,7 @@ def user_data_push_in_base():
 # user_data_push_in_base()   # Вызов функции записи данных пользователя
 
 
-
 def search_hits_push_in_base():
-
     with open('sql/json_data/pair_data.json', 'r', encoding='UTF-8') as file:
         json_data = json.load(file)
 
@@ -81,7 +79,7 @@ def search_hits_push_in_base():
             # Определяем колонки и их значения для записи в базу. Запись данных в базу дынных VKinder
             first_name=data['first_name'],
             last_name=data['last_name'],
-            city= data['city'],
+            city=data['city'],
             profile_url=data['profile_url'],
             photos=data['photos']
         )
@@ -90,6 +88,7 @@ def search_hits_push_in_base():
     session.commit()  # фиксируем изменения в базе
 
     session.close()  # закрываем соединение с базой
+
 
 # search_hits_push_in_base()
 
@@ -105,8 +104,8 @@ def city_id_push_in_base():  # Запись данных city_id в базу д�
         city_object = city.insert().values(
             city_id=data.get('id'),
             title=data.get('title'),
-            area=data.get('area'),   # Если ключа и значения нет, то get() вернет None
-            region=data.get('region')   # Если ключа и значения нет, то get() вернет None
+            area=data.get('area'),  # Если ключа и значения нет, то get() вернет None
+            region=data.get('region')  # Если ключа и значения нет, то get() вернет None
         )
         session.execute(city_object)  # добавляем записи в базу
 
@@ -116,7 +115,8 @@ def city_id_push_in_base():  # Запись данных city_id в базу д�
 
 
 # city_id_push_in_base()  # Вызов функции записи данных city_id в базу данных
-# Объявляем цель select запроса в базу VKinder и таблицу users
+vk_id = '213123'  # Объявляем цель select запроса в базу VKinder и таблицу users
+
 
 def get_user_data():  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
@@ -127,4 +127,15 @@ def get_user_data():  # select запрос в таблицу users
     session.close()  # Закрываем сессию
     return rows
 
-# get_user_data()   # Вызываем функцию для проверки, но только в дебагере, чтобы увидеть результат
+
+# pprint(get_user_data())   # Проверка функции
+
+
+def get_pair_data():  # SELECT запрос в таблицу pair
+    selection_query = Select(pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos)
+    result = session.execute(selection_query)
+    rows = result.fetchall()
+    session.close()
+    return rows
+
+pprint(get_pair_data())   # Проверка функции
