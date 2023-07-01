@@ -5,7 +5,7 @@ from tqdm import tqdm
 from pprint import pprint
 
 # Не забываем подставлять свои пароль и имя пользователя
-DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()  # Создаем объект сессии
@@ -122,7 +122,7 @@ def get_user_data():  # select запрос в таблицу users
 
 # pprint(get_user_data())   # Проверка функции
 
-def get_pair_data():  # SELECT запрос в таблицу pair
+def get_pair_data():  # select запрос в таблицу pair
     selection_query = Select(pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos)
     result = session.execute(selection_query)
     rows = result.fetchall()

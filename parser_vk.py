@@ -1,5 +1,4 @@
 import requests, json
-from tokens import user_token
 from tqdm import tqdm
 import sys
 
@@ -53,19 +52,13 @@ class VK_Parse:
             photos_result = photos_response.json()
             photo_urls = []
             if 'response' in photos_result:
-                for photo in photos_result['response']['items']:
+                photos = photos_result['response']['items']
+                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get('count', 0), reverse=True)
+                for photo in sorted_photos[:3]:
                     photo_urls.append(photo['sizes'][-1]['url'])
             return photo_urls
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
-    
-#     def get_city_id(self):
-        
-#         params = {'hometown': self.city,
-#                   'access_token': self.access_token,
-#                   'v': '5.131'}
-#         response = requests.get('https://api.vk.com/method/database.getCities', params=params)
-#         return response.json()
-#         # self.city =        
+         
 
