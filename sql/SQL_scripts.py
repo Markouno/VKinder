@@ -103,9 +103,9 @@ def get_pair_data():  # select запрос в таблицу pair
 
 def get_favorite_data(vk_user):   # SELECT запрос в таблицу favorite
     selection_query = Select(
-        pair.c.first_name, pair.c.last_name, pair.c.prifile_url, pair.c.photos
-        ).outerjoin(favorite, pair.id == favorite.c.pair_id
-        ).outerjoin(users, favorite.users.id == users.c.id
+        pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos
+        ).join(favorite, pair.c.id == favorite.c.pair_id
+        ).join(users, favorite.c.users_id == users.c.id
         ).where(users.c.vk_user == vk_user)
     result = session.execute(selection_query)
     rows = result.fetchall()
