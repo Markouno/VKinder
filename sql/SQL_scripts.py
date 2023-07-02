@@ -83,7 +83,7 @@ def push_pair_in_favorite():   # Добавляем user и pair в избран
 
 # push_pair_in_favorite()   # Вызов функции записи избранных пар
 
-def get_user_data():  # select запрос в таблицу users
+def get_user_data(vk_id):  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
     select_query = Select(users.c.gender, users.c.age, users.c.city).where(
         users.c.vk_user == vk_id)  # Указываем параметры select запроса, что достать и условие поиска
