@@ -4,14 +4,26 @@ from tokens import user_token
 
 
 class VK_Parse:
-    def __init__(self, access_token, age_from, age_to, sex):
+    def __init__(self, access_token, gender, age, city):
         self.access_token = access_token
-        self.age_from = age_from
-        self.age_to = age_to
-        self.sex = sex
+        self.age = age
+        if gender == 'Мужской':
+            gender = '2'
+        else:
+            gender = '1'
+        self.gender = gender
+        self.city = city
 
     def parse(self):
-        params = {'count': '1000', 'sex': self.sex, 'has_photo': '1', 'age_from': self.age_from, 'age_to': self.age_to, 'access_token': self.access_token, 'v': '5.131', 'fields': 'city'}
+        params = {'count': '1000',
+                  'sex': self.gender,
+                  'hometown': self.city,
+                  'age_from': self.age,
+                  'age_to': self.age,
+                  'has_photo': '1',
+                  'access_token': self.access_token,
+                  'v': '5.131' 
+                  }
         try:
             response = requests.get('https://api.vk.com/method/users.search', params=params)
             result = response.json()
@@ -23,15 +35,19 @@ class VK_Parse:
             for item in res:
                 profile_url = f"https://vk.com/id{item['id']}"
                 photos = self.get_photos(item['id'])
-                city = item.get('city', {}).get('title')
-                if city and photos:
-                    json_list.append({'id': item['id'], 'first_name': item['first_name'], 'last_name': item['last_name'], 'city': city, 'profile_url': profile_url, 'photos': photos})
+                if photos:
+                    json_list.append({'id': item['id'],
+                                      'first_name': item['first_name'],
+                                      'last_name': item['last_name'],
+                                      'city': self.city, 
+                                      'profile_url': profile_url, 
+                                      'photos': photos})
 
             with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
 
     def get_photos(self, user_id):
-        photos_params = {'owner_id': user_id, 'album_id': 'profile', 'rev': '1', 'count': '3', 'access_token': self.access_token, 'v': '5.131'}
+        photos_params = {'owner_id': user_id, 'album_id': 'profile', 'rev': '1', 'access_token': self.access_token, 'v': '5.131', 'extended': '1'}
         try:
             photos_response = requests.get('https://api.vk.com/method/photos.get', params=photos_params)
             photos_result = photos_response.json()
@@ -46,5 +62,5 @@ class VK_Parse:
             print(f"Ошибка при получении фотографий: {e}")
             return []
 
-vk_parse = VK_Parse(user_token, 18, 30, 1)
+vk_parse = VK_Parse(user_token, 1, 25, 'Москва')
 vk_parse.parse()
