@@ -1,6 +1,6 @@
-import requests
-import json
-from tokens import user_token
+import requests, json
+from tqdm import tqdm
+import sys
 
 
 class VK_Parse:
@@ -32,7 +32,7 @@ class VK_Parse:
         else:
             res = result['response']['items']
             json_list = []
-            for item in res:
+            for item in tqdm(res, desc='Идет поиск...'):
                 profile_url = f"https://vk.com/id{item['id']}"
                 photos = self.get_photos(item['id'])
                 if photos:
@@ -47,7 +47,12 @@ class VK_Parse:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
 
     def get_photos(self, user_id):
-        photos_params = {'owner_id': user_id, 'album_id': 'profile', 'rev': '1', 'access_token': self.access_token, 'v': '5.131', 'extended': '1'}
+        photos_params = {'owner_id': user_id,
+                         'album_id': 'profile',
+                         'rev': '1',
+                         'access_token': self.access_token,
+                         'extended': '1',
+                         'v': '5.131'}
         try:
             photos_response = requests.get('https://api.vk.com/method/photos.get', params=photos_params)
             photos_result = photos_response.json()
@@ -61,6 +66,3 @@ class VK_Parse:
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
-
-vk_parse = VK_Parse(user_token, 1, 25, 'Москва')
-vk_parse.parse()
