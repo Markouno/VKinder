@@ -59,17 +59,17 @@ for event in longpoll.listen():
                 chat_button.add_button('Дальше', VkKeyboardColor.NEGATIVE)
                 pair_list = get_pair_data()
                 for item in pair_list:
-                    first_name, last_name, page, photos = item[0], item[1], item[2], item[3]
+                    id, first_name, last_name, page, photos = item[0], item[1], item[2], item[3], item[4]
                     photos = photos[1 : -1]
-                    print(photos)
+                    # print(id)
                     write_msg(event.user_id, f'{first_name} {last_name}\n{page}', chat_button, photos)
                     for event in longpoll.listen():
                         if event.type == VkEventType.MESSAGE_NEW and event.to_me:
                             request = event.text
-                            if request == 'Дальше' or '2':
+                            if request == 'Нравится' or '1':
+                                push_pair_in_favorite(event.user_id, id)
                                 break
-                            elif request == 'Нравится' or '1':
-                                # здесь должен быть инсерт в фавориты
+                            elif request == 'Дальше' or '2':
                                 break
                 
                 

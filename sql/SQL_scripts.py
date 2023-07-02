@@ -5,7 +5,7 @@ from tqdm import tqdm
 from pprint import pprint
 
 # Не забываем подставлять свои пароль и имя пользователя
-DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()  # Создаем объект сессии
@@ -30,13 +30,6 @@ favorite = Table('favorite', metadata,  # Создаем таблицу связ
                  Column('id', Integer, primary_key=True),
                  Column('users_id', Integer, ForeignKey('users.id')),
                  Column('pair_id', Integer, ForeignKey('pair.id')))
-
-city = Table('city', metadata,  # Создаем таблицу с данными id всех населенных пунктов, их - 157710шт.
-             Column('id', Integer, primary_key=True),
-             Column('city_id', String(15), nullable=False),
-             Column('title', String(100), nullable=False),
-             Column('area', String(100)),
-             Column('region', String(100)))
 
 def create_table_in_base():  # Функция создания таблиц в базе данных используя объекты MetaData
     metadata.create_all(engine)
@@ -77,12 +70,12 @@ def search_hits_push_in_base():
 
 # search_hits_push_in_base()   #   Вызов функции записи данных в базу, результата парсинга по параметрам пользователя
 
-def push_pair_in_favorite():   # Добавляем user и pair в избранное, устанавливаем связь
-    with open('sql/json_data/favorite.json', 'r', encoding='UTF-8') as file:
-        data = json.load(file)
+def push_pair_in_favorite(vk_id, pair_id):   # Добавляем user и pair в избранное, устанавливаем связь
+    new_data = get_user_data(vk_id)   # Получаем данные users
+    users_id = new_data[0]   # берем id user
     insert_values = favorite.insert().values(
-        users_id=data['users_id'],
-        pairs_id=data['pairs_id']
+        users_id=users_id,
+        pair_id=pair_id
     )
     session.execute(insert_values)
     session.commit()
@@ -90,43 +83,44 @@ def push_pair_in_favorite():   # Добавляем user и pair в избран
 
 # push_pair_in_favorite()   # Вызов функции записи избранных пар
 
-def city_id_push_in_base():  # Запись данных city_id в базу данных
-    with open('json_data/city_id_database.json', 'r', encoding='UTF-8') as file:
-        json_data = json.load(file)
 
-    for data in tqdm(json_data):  # Запускаем цикл со счетчиком tqdm
-        city_object = city.insert().values(
-            city_id=data.get('id'),
-            title=data.get('title'),
-            area=data.get('area'),  # Если ключа и значения нет, то get() вернет None
-            region=data.get('region')  # Если ключа и значения нет, то get() вернет None
-        )
-        session.execute(city_object)  # добавляем записи в базу
-
-    session.commit()  # фиксируем изменения в базе
-
-    session.close()  # закрываем соединение с базой
-
-# city_id_push_in_base()  # Вызов функции записи данных city_id в базу данных
-
-vk_id = '213123'  # Объявляем цель select запроса в базу VKinder и таблицу users
-
-def get_user_data():  # select запрос в таблицу users
+def get_user_data(vk_id):  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
-    select_query = Select(users.c.gender, users.c.age, users.c.city).where(
-        users.c.vk_user == vk_id)  # Указываем параметры select запроса, что достать и условие поиска
+    select_query = Select( users.c.id, users.c.gender, users.c.age, users.c.city
+    ).where(users.c.vk_user == str(vk_id))  # Указываем параметры select запроса, что достать и условие поиска
     result = session.execute(select_query)
-    rows = result.fetchall()  # Вся информация интересующая нас лежит здесь
+    rows = result.fetchone()  # Вся информация интересующая нас лежит здесь
     session.close()  # Закрываем сессию
     return rows
 
-# pprint(get_user_data())   # Проверка функции
 
 def get_pair_data():  # select запрос в таблицу pair
-    selection_query = Select(pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos)
+    selection_query = Select(pair.c.id, pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos)
     result = session.execute(selection_query)
     rows = result.fetchall()
     session.close()
     return rows
 
 # pprint(get_pair_data())   # Проверка функции
+
+
+def get_favorite_data(vk_user):   # SELECT запрос в таблицу favorite
+    selection_query = Select(
+        pair.c.first_name, pair.c.last_name, pair.c.prifile_url, pair.c.photos
+        ).outerjoin(favorite, pair.id == favorite.c.pair_id
+        ).outerjoin(users, favorite.users.id == users.c.id
+        ).where(users.c.vk_user == vk_user)
+    result = session.execute(selection_query)
+    rows = result.fetchall()
+    session.close()
+    return rows
+
+
+
+
+
+# SELECT first_name, last_name, profile_url, photos
+# FROM pair
+# JOIN favorite ON pair.id = favorite.pair_id
+# JOIN users ON favorite.users_id = users.id
+# WHERE vk_user = '%s'
