@@ -2,6 +2,7 @@ import requests, json
 from tqdm import tqdm
 import sys
 
+
 class VK_Parse:
     def __init__(self, access_token, gender, age, city):
         self.access_token = access_token
@@ -33,14 +34,14 @@ class VK_Parse:
             json_list = []
             for item in tqdm(res, desc='Идет поиск...'):
                 profile_url = f"https://vk.com/id{item['id']}"
-                json_list.append({'id': item['id'],
-                                  'first_name': item['first_name'],
-                                  'last_name': item['last_name'],
-                                  'city': self.city,
-                                  'profile_url': profile_url})
-
                 photos = self.get_photos(item['id'])
-                json_list[-1]['photos'] = photos
+                if photos:
+                    json_list.append({'id': item['id'],
+                                    'first_name': item['first_name'],
+                                    'last_name': item['last_name'],
+                                    'city': self.city,
+                                    'profile_url': profile_url,
+                                    'photos': photos})
 
             with open('sql/json_data/pair_data.json', 'w', encoding='UTF-8') as jsonfile:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
@@ -60,5 +61,3 @@ class VK_Parse:
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
-         
-

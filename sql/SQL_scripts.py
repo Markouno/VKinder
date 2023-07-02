@@ -31,13 +31,6 @@ favorite = Table('favorite', metadata,  # Создаем таблицу связ
                  Column('users_id', Integer, ForeignKey('users.id')),
                  Column('pair_id', Integer, ForeignKey('pair.id')))
 
-city = Table('city', metadata,  # Создаем таблицу с данными id всех населенных пунктов, их - 157710шт.
-             Column('id', Integer, primary_key=True),
-             Column('city_id', String(15), nullable=False),
-             Column('title', String(100), nullable=False),
-             Column('area', String(100)),
-             Column('region', String(100)))
-
 def create_table_in_base():  # Функция создания таблиц в базе данных используя объекты MetaData
     metadata.create_all(engine)
 
@@ -89,27 +82,6 @@ def push_pair_in_favorite():   # Добавляем user и pair в избран
     session.close()
 
 # push_pair_in_favorite()   # Вызов функции записи избранных пар
-
-def city_id_push_in_base():  # Запись данных city_id в базу данных
-    with open('json_data/city_id_database.json', 'r', encoding='UTF-8') as file:
-        json_data = json.load(file)
-
-    for data in tqdm(json_data):  # Запускаем цикл со счетчиком tqdm
-        city_object = city.insert().values(
-            city_id=data.get('id'),
-            title=data.get('title'),
-            area=data.get('area'),  # Если ключа и значения нет, то get() вернет None
-            region=data.get('region')  # Если ключа и значения нет, то get() вернет None
-        )
-        session.execute(city_object)  # добавляем записи в базу
-
-    session.commit()  # фиксируем изменения в базе
-
-    session.close()  # закрываем соединение с базой
-
-# city_id_push_in_base()  # Вызов функции записи данных city_id в базу данных
-
-vk_id = '213123'  # Объявляем цель select запроса в базу VKinder и таблицу users
 
 def get_user_data():  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
