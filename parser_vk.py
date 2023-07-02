@@ -47,7 +47,12 @@ class VK_Parse:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
 
     def get_photos(self, user_id):
-        photos_params = {'owner_id': user_id, 'album_id': 'profile', 'rev': '1', 'count': '3', 'access_token': self.access_token, 'v': '5.131'}
+        photos_params = {'owner_id': user_id,
+                         'album_id': 'profile',
+                         'rev': '1',
+                         'access_token': self.access_token,
+                         'extended': '1',
+                         'v': '5.131'}
         try:
             photos_response = requests.get('https://api.vk.com/method/photos.get', params=photos_params)
             photos_result = photos_response.json()
