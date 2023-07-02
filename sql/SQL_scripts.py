@@ -83,7 +83,6 @@ def push_pair_in_favorite(vk_id, pair_id):   # Добавляем user и pair �
 
 # push_pair_in_favorite()   # Вызов функции записи избранных пар
 
-
 def get_user_data(vk_id):  # select запрос в таблицу users
     session = Session()  # Создаем новую сессию
     select_query = Select( users.c.id, users.c.gender, users.c.age, users.c.city
@@ -93,7 +92,6 @@ def get_user_data(vk_id):  # select запрос в таблицу users
     session.close()  # Закрываем сессию
     return rows
 
-
 def get_pair_data():  # select запрос в таблицу pair
     selection_query = Select(pair.c.id, pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos)
     result = session.execute(selection_query)
@@ -102,7 +100,6 @@ def get_pair_data():  # select запрос в таблицу pair
     return rows
 
 # pprint(get_pair_data())   # Проверка функции
-
 
 def get_favorite_data(vk_user):   # SELECT запрос в таблицу favorite
     selection_query = Select(
@@ -114,13 +111,3 @@ def get_favorite_data(vk_user):   # SELECT запрос в таблицу favori
     rows = result.fetchall()
     session.close()
     return rows
-
-
-
-
-
-# SELECT first_name, last_name, profile_url, photos
-# FROM pair
-# JOIN favorite ON pair.id = favorite.pair_id
-# JOIN users ON favorite.users_id = users.id
-# WHERE vk_user = '%s'
