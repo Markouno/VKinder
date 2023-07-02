@@ -5,7 +5,7 @@ from tqdm import tqdm
 from pprint import pprint
 
 # Не забываем подставлять свои пароль и имя пользователя
-DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()  # Создаем объект сессии
@@ -36,14 +36,16 @@ def create_table_in_base():  # Функция создания таблиц в �
 
 # create_table_in_base()  # Вызов функции создания таблиц в базе данных
 
-def user_data_push_in_base():
-    with open('sql/json_data/user_data.json', 'r', encoding='UTF-8') as file:  # Чтение данных из JSON-файла
-        json_data = json.load(file)
+def user_data_push_in_base(vk_user, gender, age, city):
+    if gender == 'Мужской':
+        gender = '2'
+    else:
+        gender = '1'
     insert_values = users.insert().values(  # Определяем колонки и их значения для записи в базу
-        vk_user=json_data['vk_user'],
-        gender=json_data['gender'],
-        age=json_data['age'],
-        city=json_data['city']
+        vk_user=vk_user,
+        gender=gender,
+        age=age,
+        city=city
     )
     session.execute(insert_values)  # добавляем записи в базу
     session.commit()  # фиксируем изменения в базе
@@ -51,20 +53,15 @@ def user_data_push_in_base():
 
 # user_data_push_in_base()   # Вызов функции записи данных пользователя
 
-def search_hits_push_in_base():
-    with open('sql/json_data/pair_data.json', 'r', encoding='UTF-8') as file:
-        json_data = json.load(file)
-
-    for data in json_data:
-        pair_object = pair.insert().values(
-            # Определяем колонки и их значения для записи в базу. Запись данных в базу дынных VKinder
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            city=data['city'],
-            profile_url=data['profile_url'],
-            photos=data['photos']
+def pair_data_push_in_base(first_name, last_name, city, profile_url, photos):
+    pair_object = pair.insert().values( # Определяем колонки и их значения для записи в базу. Запись данных в базу дынных VKinder
+        first_name=first_name,
+        last_name=last_name,
+        city=city,
+        profile_url=profile_url,
+        photos=photos
         )
-        session.execute(pair_object)  # добавляем записи в базу
+    session.execute(pair_object)  # добавляем записи в базу
     session.commit()  # фиксируем изменения в базе
     session.close()  # закрываем соединение с базой
 
@@ -101,12 +98,12 @@ def get_pair_data():  # select запрос в таблицу pair
 
 # pprint(get_pair_data())   # Проверка функции
 
-def get_favorite_data(vk_user):   # SELECT запрос в таблицу favorite
+def get_favorite_data(vk_user):   # select запрос в таблицу favorite
     selection_query = Select(
-        pair.c.first_name, pair.c.last_name, pair.c.prifile_url, pair.c.photos
-        ).outerjoin(favorite, pair.id == favorite.c.pair_id
-        ).outerjoin(users, favorite.users.id == users.c.id
-        ).where(users.c.vk_user == vk_user)
+        pair.c.first_name, pair.c.last_name, pair.c.profile_url, pair.c.photos
+        ).join(favorite, pair.c.id == favorite.c.pair_id
+        ).join(users, favorite.c.users_id == users.c.id
+        ).where(users.c.vk_user == str(vk_user))
     result = session.execute(selection_query)
     rows = result.fetchall()
     session.close()

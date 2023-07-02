@@ -1,6 +1,7 @@
 import requests, json
 from tqdm import tqdm
 import sys
+from sql.SQL_scripts import *
 
 
 class VK_Parse:
@@ -31,20 +32,14 @@ class VK_Parse:
             print(f"Ошибка: {e}")
         else:
             res = result['response']['items']
-            json_list = []
             for item in tqdm(res, desc='Идет поиск...'):
                 profile_url = f"https://vk.com/id{item['id']}"
                 photos = self.get_photos(item['id'])
                 if photos:
-                    json_list.append({'id': item['id'],
-                                      'first_name': item['first_name'],
-                                      'last_name': item['last_name'],
-                                      'city': self.city, 
-                                      'profile_url': profile_url, 
-                                      'photos': photos})
-
-            with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
-                json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
+                    first_name = item['first_name']
+                    last_name = item['last_name']
+                    city = self.city
+                    pair_data_push_in_base(first_name, last_name, city, profile_url, photos)
 
     def get_photos(self, user_id):
         photos_params = {'owner_id': user_id,
