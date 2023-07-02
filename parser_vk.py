@@ -37,13 +37,13 @@ class VK_Parse:
                 photos = self.get_photos(item['id'])
                 if photos:
                     json_list.append({'id': item['id'],
-                                    'first_name': item['first_name'],
-                                    'last_name': item['last_name'],
-                                    'city': self.city,
-                                    'profile_url': profile_url,
-                                    'photos': photos})
+                                      'first_name': item['first_name'],
+                                      'last_name': item['last_name'],
+                                      'city': self.city, 
+                                      'profile_url': profile_url, 
+                                      'photos': photos})
 
-            with open('sql/json_data/pair_data.json', 'w', encoding='UTF-8') as jsonfile:
+            with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
                 json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
 
     def get_photos(self, user_id):
