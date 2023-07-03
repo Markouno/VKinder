@@ -48,7 +48,7 @@ class VK_Parse:
                     last_name = item['last_name']
                     city = self.city
                     # Запись в базу данных при каждой итерации
-                    pair_data_push_in_base(
+                    push_pair_data_in_base(
                         first_name, last_name, city, profile_url, photos)
 
     def get_photos(self, user_id):

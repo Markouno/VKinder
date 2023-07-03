@@ -51,7 +51,7 @@ for event in longpoll.listen():
                 write_msg(
                     event.user_id, f'Начинаю поиск по параметрам: {gender}, {age}, {city}.\nЭто займет менее минуты...')
                 # Метод для записи параметров поиска в базу данных users
-                user_data_push_in_base(event.user_id, gender, age, city)
+                push_user_data_in_base(event.user_id, gender, age, city)
                 vk_parser = VK_Parse(user_token, gender, age, city)
                 vk_parser.parse()  # Начало парсинга совпадений
                 chat_button.add_button('Да', VkKeyboardColor.POSITIVE)
