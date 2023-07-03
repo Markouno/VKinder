@@ -1,10 +1,11 @@
-import requests, json
+from sql.SQL_scripts import *
+import json
+import requests
 from tqdm import tqdm
-import sys
 
 
 class VK_Parse:
-    def __init__(self, access_token, gender, age, city):
+    def __init__(self, access_token, gender, age, city):  # Инициализация входных параметров
         self.access_token = access_token
         self.age = age
         if gender == 'Мужской':
@@ -15,6 +16,12 @@ class VK_Parse:
         self.city = city
 
     def parse(self):
+        '''
+        Метод использует API-VK для парсинга пользователей
+        Используя параметры в инициализаторе метод возвращает совпадения, после чего применяет
+        метод get_photos для парсинга фотографий пользователей и записывает мета-дату по одному в базу данных
+        при помощи функции pair_data_push_in_base, импортированной из собственного модуля SQL_scripts
+        '''
         params = {'count': '1000',
                   'sex': self.gender,
                   'hometown': self.city,
@@ -22,31 +29,33 @@ class VK_Parse:
                   'age_to': self.age,
                   'has_photo': '1',
                   'access_token': self.access_token,
-                  'v': '5.131' 
+                  'v': '5.131'
                   }
         try:
-            response = requests.get('https://api.vk.com/method/users.search', params=params)
+            response = requests.get(
+                'https://api.vk.com/method/users.search', params=params)
             result = response.json()
         except Exception as e:
             print(f"Ошибка: {e}")
         else:
             res = result['response']['items']
-            json_list = []
+            # Прогресс-бар каждой итерации отображается в терминале
             for item in tqdm(res, desc='Идет поиск...'):
                 profile_url = f"https://vk.com/id{item['id']}"
                 photos = self.get_photos(item['id'])
                 if photos:
-                    json_list.append({'id': item['id'],
-                                      'first_name': item['first_name'],
-                                      'last_name': item['last_name'],
-                                      'city': self.city, 
-                                      'profile_url': profile_url, 
-                                      'photos': photos})
-
-            with open('pair_data.json', 'w', encoding='UTF-8') as jsonfile:
-                json.dump(json_list, jsonfile, ensure_ascii=False, indent=2)
+                    first_name = item['first_name']
+                    last_name = item['last_name']
+                    city = self.city
+                    # Запись в базу данных при каждой итерации
+                    pair_data_push_in_base(
+                        first_name, last_name, city, profile_url, photos)
 
     def get_photos(self, user_id):
+        '''
+        Метод использует API-VK для парсинга фотографий указанного пользователя
+        На вход принимает ID пользователя, после чего возвращает 3 популярных (по лайкам) фотографии с профиля
+        '''
         photos_params = {'owner_id': user_id,
                          'album_id': 'profile',
                          'rev': '1',
@@ -54,12 +63,14 @@ class VK_Parse:
                          'extended': '1',
                          'v': '5.131'}
         try:
-            photos_response = requests.get('https://api.vk.com/method/photos.get', params=photos_params)
+            photos_response = requests.get(
+                'https://api.vk.com/method/photos.get', params=photos_params)
             photos_result = photos_response.json()
             photo_urls = []
             if 'response' in photos_result:
                 photos = photos_result['response']['items']
-                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get('count', 0), reverse=True)
+                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get(
+                    'count', 0), reverse=True)  # Сортировка по лайкам
                 for photo in sorted_photos[:3]:
                     photo_urls.append(photo['sizes'][-1]['url'])
             return photo_urls
