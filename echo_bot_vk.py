@@ -37,7 +37,7 @@ for event in longpoll.listen():
             request = event.text
             filter_list = event.text.split(', ')
             chat_button = VkKeyboard(inline=True)  # Инициализация кнопок
-            if request == 'Начать':
+            if request == 'Начать' or request in hello_list:
                 write_msg(
                     event.user_id, f'{random.choice(answer_list)}')  # Приветствие от бота пользователю
                 write_msg(
