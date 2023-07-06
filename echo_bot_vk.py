@@ -63,7 +63,7 @@ for event in longpoll.listen():
                 chat_button.add_button('Нравится', VkKeyboardColor.POSITIVE)
                 chat_button.add_button('Дальше', VkKeyboardColor.NEGATIVE)
                 chat_button.add_button('Показать избранных', VkKeyboardColor.SECONDARY)
-                pair_list = get_pair_data()  # Метод, возвращающий совпадения из базы данных
+                pair_list = get_pair_data(event.user_id)  # Метод, возвращающий совпадения из базы данных
                 for item in pair_list:
                     # Присваиваем переменные
                     id, first_name, last_name, page, photos = item[0], item[1], item[2], item[3], item[4]
