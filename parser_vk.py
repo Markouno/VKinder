@@ -2,11 +2,13 @@ from sql.SQL_scripts import *
 import json
 import requests
 from tqdm import tqdm
+from tokens import user_token
 
 
 class VK_Parse:
-    def __init__(self, access_token, gender, age, city):  # Инициализация входных параметров
+    def __init__(self, access_token, vk_user_id, gender, age, city):  # Инициализация входных параметров
         self.access_token = access_token
+        self.vk_user_id = vk_user_id
         self.age = age
         if gender == 'Мужской':
             gender = '2'
@@ -31,25 +33,28 @@ class VK_Parse:
                   'access_token': self.access_token,
                   'v': '5.131'
                   }
-        try:
-            response = requests.get(
+        response = requests.get(
                 'https://api.vk.com/method/users.search', params=params)
-            result = response.json()
-        except Exception as e:
-            print(f"Ошибка: {e}")
-        else:
-            res = result['response']['items']
-            # Прогресс-бар каждой итерации отображается в терминале
-            for item in tqdm(res, desc='Идет поиск...'):
-                profile_url = f"https://vk.com/id{item['id']}"
-                photos = self.get_photos(item['id'])
-                if photos:
-                    first_name = item['first_name']
-                    last_name = item['last_name']
-                    city = self.city
-                    # Запись в базу данных при каждой итерации
-                    push_pair_data_in_base(
-                        first_name, last_name, city, profile_url, photos)
+        result = response.json()
+        try:
+            if 'error' not in result:
+                if result['response']['count'] != '0':
+                    res = result['response']['items']
+                    # Прогресс-бар каждой итерации отображается в терминале
+                    for item in tqdm(res, desc='Идет поиск...'):
+                        
+                        profile_url = f"https://vk.com/id{item['id']}"
+                        photos = self.get_photos(item['id'])
+                        if photos:
+                            first_name = item['first_name']
+                            last_name = item['last_name']
+                            city = self.city
+                            # Запись в базу данных при каждой итерации
+                            push_pair_data_in_base(self.vk_user_id, first_name, last_name, city, profile_url, photos)
+            return f'Всё готово!'
+        except Exception:
+            return f'&#10060; Ошибка:\nОдин или несколько параметров указаны неверно.\nПопробуйте ещё раз.'
+            
 
     def get_photos(self, user_id):
         '''
@@ -69,11 +74,13 @@ class VK_Parse:
             photo_urls = []
             if 'response' in photos_result:
                 photos = photos_result['response']['items']
-                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get(
-                    'count', 0), reverse=True)  # Сортировка по лайкам
+                sorted_photos = sorted(photos, key=lambda x: x.get('likes', {}).get('count', 0), reverse=True)  # Сортировка по лайкам
                 for photo in sorted_photos[:3]:
                     photo_urls.append(photo['sizes'][-1]['url'])
             return photo_urls
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
+        
+# test = VK_Parse(user_token, '790733692', 'Мужской', '20', 'Самара')
+# print(test.parse())

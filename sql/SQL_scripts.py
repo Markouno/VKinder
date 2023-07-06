@@ -3,7 +3,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import Table, Column, String, Integer, ForeignKey, MetaData, Select
 
 # Не забываем подставлять свой пароль и имя пользователя
-DSN = 'postgresql://postgres:1604@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
+DSN = 'postgresql://postgres:Markouno123@localhost:5432/VKinder'  # Определяем параметры подключения к базе данных
 engine = sqlalchemy.create_engine(DSN)  # Создаем движок подключения
 Session = sessionmaker(bind=engine)  # Создаем сессию в которую передаем движок подключения
 session = Session()  # Создаем объект сессии
@@ -43,7 +43,7 @@ def push_user_data_in_base(vk_id, gender, age, city):
     else:
         gender = '1'
     insert_values = users.insert().values(  # Определяем колонки и их значения для записи в базу
-        vk_user=vk_id,
+        vk_id=vk_id,
         gender=gender,
         age=age,
         city=city
@@ -55,7 +55,7 @@ def push_user_data_in_base(vk_id, gender, age, city):
 
 def push_pair_data_in_base(vk_id, first_name, last_name, city, profile_url, photos):
     insert_values = pair.insert().values(  # Определяем колонки и их значения для записи в базу
-        vk_user_id=vk_id,
+        vk_id=vk_id,
         first_name=first_name,  # Поле в базе = передаваемый элемент в функцию
         last_name=last_name,
         city=city,

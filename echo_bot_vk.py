@@ -12,7 +12,8 @@ longpoll = VkLongPoll(vk)
 
 answer_list = ['Привет!', 'Приветствую!', 'Здравствуйте!', 'Здарова!']
 hello_list = ['Привет', 'привет', 'Салам',
-              'салам', 'Хай', 'хай', 'Здарова', 'здарова']
+              'салам', 'Хай', 'хай', 'Здарова', 'здарова',
+              'Начать', 'Start', 'Начать поиск']
 
 
 def write_msg(user_id, message, keyboard=None, attachment=None):
@@ -49,20 +50,24 @@ for event in longpoll.listen():
                 age = filter_list[1]
                 city = filter_list[2]
                 write_msg(
-                    event.user_id, f'Начинаю поиск по параметрам: {gender}, {age}, {city}.\nЭто займет менее минуты...')
-                # Метод для записи параметров поиска в базу данных users
-                push_user_data_in_base(event.user_id, gender, age, city)
-                vk_parser = VK_Parse(user_token, gender, age, city)
-                vk_parser.parse()  # Начало парсинга совпадений
-                chat_button.add_button('Да', VkKeyboardColor.POSITIVE)
-                chat_button.add_button('Нет', VkKeyboardColor.NEGATIVE)
-                write_msg(
-                    event.user_id, f'Готово! Начинаем?', chat_button)
+                    event.user_id, f'&#128269; Начинаю поиск по параметрам: {gender}, {age}, {city}.\nЭто займет менее минуты...')
 
-            elif request == 'Да':
+                vk_parser = VK_Parse(user_token, event.user_id, gender, age, city)
+                parser_data = vk_parser.parse()  # Начало парсинга совпадений
+                if parser_data != 'Всё готово!':
+                    write_msg(event.user_id, f'&#10060; Ошибка:\nОдин или несколько параметров указаны неверно.\nПопробуйте ещё раз.')
+                else:
+                    # Метод для записи параметров поиска в базу данных users
+                    push_user_data_in_base(event.user_id, gender, age, city)            
+                    chat_button.add_button('Давай посмотрим', VkKeyboardColor.POSITIVE)
+                    chat_button.add_button('Нет', VkKeyboardColor.NEGATIVE)
+                    write_msg(
+                        event.user_id, f'{parser_data} Начинаем?', chat_button)
+
+            elif request == 'Давай посмотрим':
                 chat_button.add_button('Нравится', VkKeyboardColor.POSITIVE)
                 chat_button.add_button('Дальше', VkKeyboardColor.NEGATIVE)
-                chat_button.add_button('Показать избранных', VkKeyboardColor.SECONDARY)
+                chat_button.add_button('Стоп', VkKeyboardColor.SECONDARY)
                 pair_list = get_pair_data(event.user_id)  # Метод, возвращающий совпадения из базы данных
                 for item in pair_list:
                     # Присваиваем переменные
@@ -81,13 +86,25 @@ for event in longpoll.listen():
                             elif request == 'Дальше':
                                 break
 
-                            elif request == 'Показать избранных':
-                                favorite_data = get_favorite_data(event.user_id)
-                                for item in favorite_data:
-                                    first_name, last_name, page, photos = item[0], item[1], item[2], item[3]
-                                    photos = photos[1: -1]
-                                    write_msg(
-                                        event.user_id, f'{first_name} {last_name}\n{page}', None, photos)
-
+                            elif request == 'Стоп':
+                                 break
+                        elif request == 'Стоп':
+                             break
+                    if request == 'Стоп':
+                         menu_button = VkKeyboard(inline=True)
+                         menu_button.add_button('Начать поиск', VkKeyboardColor.POSITIVE)
+                         menu_button.add_button('Избранные', VkKeyboardColor.SECONDARY)
+                         write_msg(event.user_id, f'Что делаем?', menu_button)
+                         break
+            elif request == 'Нет':
+                write_msg(event.user_id, f'Что делаем?', menu_button)
+            
+            elif request == 'Избранные':
+                favorite_data = get_favorite_data(event.user_id)
+                for item in favorite_data:
+                    first_name, last_name, page, photos = item[0], item[1], item[2], item[3]
+                    photos = photos[1: -1]
+                    write_msg(
+                        event.user_id, f'{first_name} {last_name}\n{page}', None, photos)
             else:
-                write_msg(event.user_id, "Не поняла вашего ответа...")
+                write_msg(event.user_id, "Не поняла вашего ответа...")                                
