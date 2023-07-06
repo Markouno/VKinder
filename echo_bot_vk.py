@@ -54,8 +54,9 @@ for event in longpoll.listen():
 
                 vk_parser = VK_Parse(user_token, event.user_id, gender, age, city)
                 parser_data = vk_parser.parse()  # Начало парсинга совпадений
-                if parser_data != 'Всё готово!':
-                    write_msg(event.user_id, f'&#10060; Ошибка:\nОдин или несколько параметров указаны неверно.\nПопробуйте ещё раз.')
+                bad_answer = f'&#10060; Ошибка:\nОдин или несколько параметров указаны неверно.\nПопробуйте ещё раз.'
+                if parser_data == bad_answer:
+                    write_msg(event.user_id, bad_answer)
                 else:
                     # Метод для записи параметров поиска в базу данных users
                     push_user_data_in_base(event.user_id, gender, age, city)            

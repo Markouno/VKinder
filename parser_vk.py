@@ -37,21 +37,23 @@ class VK_Parse:
                 'https://api.vk.com/method/users.search', params=params)
         result = response.json()
         try:
-            if 'error' not in result:
-                if result['response']['count'] != '0':
-                    res = result['response']['items']
-                    # Прогресс-бар каждой итерации отображается в терминале
-                    for item in tqdm(res, desc='Идет поиск...'):
-                        
-                        profile_url = f"https://vk.com/id{item['id']}"
-                        photos = self.get_photos(item['id'])
-                        if photos:
-                            first_name = item['first_name']
-                            last_name = item['last_name']
-                            city = self.city
-                            # Запись в базу данных при каждой итерации
-                            push_pair_data_in_base(self.vk_user_id, first_name, last_name, city, profile_url, photos)
-            return f'Всё готово!'
+            if result['response']['count'] != 0:
+                res = result['response']['items']
+            # Прогресс-бар каждой итерации отображается в терминале
+                for item in tqdm(res, desc='Идет поиск...'):
+                    
+                    profile_url = f"https://vk.com/id{item['id']}"
+                    photos = self.get_photos(item['id'])
+                    if photos:
+                        first_name = item['first_name']
+                        last_name = item['last_name']
+                        city = self.city
+                        # Запись в базу данных при каждой итерации
+                        push_pair_data_in_base(self.vk_user_id, first_name, last_name, city, profile_url, photos)
+                return 'Всё готово!'
+            else:
+                raise Exception
+        
         except Exception:
             return f'&#10060; Ошибка:\nОдин или несколько параметров указаны неверно.\nПопробуйте ещё раз.'
             
@@ -81,6 +83,3 @@ class VK_Parse:
         except Exception as e:
             print(f"Ошибка при получении фотографий: {e}")
             return []
-        
-# test = VK_Parse(user_token, '790733692', 'Мужской', '20', 'Самара')
-# print(test.parse())
